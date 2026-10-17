@@ -55,6 +55,54 @@
     <div class="aba-conteudo"></div>
   </section>
 
+  <section class="aba" id="aba-cadastrar">
+    <div class="aba-topo">
+      <div class="aba-emoji">🌈</div>
+      <h2>Criar conta</h2>
+      <p>Cadastre-se para guardar seu progresso e ganhar troféus.</p>
+    </div>
+    <div class="aba-conteudo">
+      <form class="aba-form" id="form-cadastrar" novalidate>
+        <label for="cad-nome">Nome da criança</label>
+        <input id="cad-nome" type="text" autocomplete="given-name" placeholder="Ex.: Maria">
+
+        <label for="cad-email">E-mail do responsável</label>
+        <input id="cad-email" type="email" autocomplete="email" placeholder="nome@email.com">
+
+        <label for="cad-senha">Senha</label>
+        <input id="cad-senha" type="password" autocomplete="new-password" placeholder="Mínimo de 6 caracteres">
+
+        <label for="cad-senha2">Repetir a senha</label>
+        <input id="cad-senha2" type="password" autocomplete="new-password" placeholder="Digite a senha de novo">
+
+        <p class="aba-erro" id="erro-cadastrar" role="alert"></p>
+        <button type="submit" class="aba-enviar">Criar minha conta</button>
+        <p class="aba-troca">Já tem conta? <a href="#entrar">Entrar</a></p>
+      </form>
+    </div>
+  </section>
+
+  <section class="aba" id="aba-entrar">
+    <div class="aba-topo">
+      <div class="aba-emoji">🔑</div>
+      <h2>Entrar</h2>
+      <p>Que bom ver você de novo! Continue de onde parou.</p>
+    </div>
+    <div class="aba-conteudo">
+      <form class="aba-form" id="form-entrar" novalidate>
+        <label for="ent-email">E-mail</label>
+        <input id="ent-email" type="email" autocomplete="email" placeholder="nome@email.com">
+
+        <label for="ent-senha">Senha</label>
+        <input id="ent-senha" type="password" autocomplete="current-password" placeholder="Sua senha">
+
+        <p class="aba-erro" id="erro-entrar" role="alert"></p>
+        <button type="submit" class="aba-enviar">Entrar</button>
+        <p class="aba-troca">Ainda não tem conta? <a href="#cadastrar">Cadastrar</a></p>
+      </form>
+    </div>
+  </section>
+
 <main>
   <section class="hero" id="inicio">
     <div class="hero-in">

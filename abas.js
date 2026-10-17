@@ -132,3 +132,153 @@ Object.entries(emojisCartoes).forEach(([classe, dados]) => {
     moldura.innerHTML = `<span class="emoji-grande" role="img" aria-label="${dados.nome}">${dados.emoji}</span>`;
   }
 });
+
+const cartoesClicaveis = {
+  t1: '#jogos',
+  t2: '#historias'
+};
+
+Object.entries(cartoesClicaveis).forEach(([classe, destino]) => {
+  const cartao = document.querySelector(`.card.${classe}`);
+  if (!cartao) return;
+
+  const titulo = cartao.querySelector('h3').textContent;
+  cartao.classList.add('clicavel');
+  cartao.setAttribute('role', 'link');
+  cartao.setAttribute('tabindex', '0');
+  cartao.setAttribute('aria-label', `Abrir ${titulo}`);
+
+  const abrir = () => {
+    history.pushState(null, '', destino);
+    mostrarAba(destino);
+  };
+
+  cartao.addEventListener('click', abrir);
+  cartao.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      abrir();
+    }
+  });
+});
+
+abas['#cadastrar'] = 'aba-cadastrar';
+abas['#entrar'] = 'aba-entrar';
+
+const linkCadastrar = document.querySelector('.acoes .btn-verde');
+const linkEntrar = document.querySelector('.acoes .entrar');
+linkCadastrar.setAttribute('href', '#cadastrar');
+linkEntrar.setAttribute('href', '#entrar');
+
+mostrarAba(location.hash);
+
+function irPara(hash) {
+  history.pushState(null, '', hash);
+  mostrarAba(hash);
+}
+
+const CHAVE_USUARIOS = 'alfabetizacao_usuarios';
+const CHAVE_SESSAO = 'alfabetizacao_sessao';
+
+function lerUsuarios() {
+  try { return JSON.parse(localStorage.getItem(CHAVE_USUARIOS)) || []; }
+  catch { return []; }
+}
+function salvarUsuarios(lista) {
+  try { localStorage.setItem(CHAVE_USUARIOS, JSON.stringify(lista)); } catch {}
+}
+function lerSessao() {
+  try { return localStorage.getItem(CHAVE_SESSAO); } catch { return null; }
+}
+function salvarSessao(email) {
+  try {
+    if (email) localStorage.setItem(CHAVE_SESSAO, email);
+    else localStorage.removeItem(CHAVE_SESSAO);
+  } catch {}
+}
+function usuarioLogado() {
+  const email = lerSessao();
+  return email ? lerUsuarios().find(u => u.email === email) : null;
+}
+
+function atualizarCabecalho() {
+  const usuario = usuarioLogado();
+  if (usuario) {
+    linkCadastrar.textContent = `Olá, ${usuario.nome}!`;
+    linkCadastrar.setAttribute('href', '#progresso');
+    linkEntrar.textContent = 'Sair';
+    linkEntrar.setAttribute('href', '#sair');
+  } else {
+    linkCadastrar.textContent = 'Cadastrar';
+    linkCadastrar.setAttribute('href', '#cadastrar');
+    linkEntrar.textContent = 'Entrar';
+    linkEntrar.setAttribute('href', '#entrar');
+  }
+}
+
+linkEntrar.addEventListener('click', e => {
+  if (!usuarioLogado()) return;
+  e.preventDefault();
+  salvarSessao(null);
+  atualizarCabecalho();
+  mostrarAviso('Até logo! 👋');
+  irPara('#inicio');
+});
+
+function mostrarErro(id, texto) {
+  document.getElementById(id).textContent = texto;
+}
+
+document.getElementById('form-cadastrar').addEventListener('submit', e => {
+  e.preventDefault();
+  const nome = document.getElementById('cad-nome').value.trim();
+  const email = document.getElementById('cad-email').value.trim().toLowerCase();
+  const senha = document.getElementById('cad-senha').value;
+  const senha2 = document.getElementById('cad-senha2').value;
+
+  if (nome.length < 2) return mostrarErro('erro-cadastrar', 'Digite o nome da criança.');
+  if (!/^\S+@\S+\.\S+$/.test(email)) return mostrarErro('erro-cadastrar', 'Digite um e-mail válido.');
+  if (senha.length < 6) return mostrarErro('erro-cadastrar', 'A senha precisa ter pelo menos 6 caracteres.');
+  if (senha !== senha2) return mostrarErro('erro-cadastrar', 'As senhas não são iguais.');
+
+  const usuarios = lerUsuarios();
+  if (usuarios.some(u => u.email === email)) {
+    return mostrarErro('erro-cadastrar', 'Já existe uma conta com esse e-mail. Tente entrar.');
+  }
+
+  usuarios.push({ nome, email, senha });
+  salvarUsuarios(usuarios);
+  salvarSessao(email);
+
+  e.target.reset();
+  mostrarErro('erro-cadastrar', '');
+  atualizarCabecalho();
+  mostrarAviso(`Conta criada! Bem-vindo(a), ${nome} 🎉`);
+  irPara('#progresso');
+});
+
+document.getElementById('form-entrar').addEventListener('submit', e => {
+  e.preventDefault();
+  const email = document.getElementById('ent-email').value.trim().toLowerCase();
+  const senha = document.getElementById('ent-senha').value;
+
+  if (!email || !senha) return mostrarErro('erro-entrar', 'Preencha o e-mail e a senha.');
+
+  const usuario = lerUsuarios().find(u => u.email === email && u.senha === senha);
+  if (!usuario) return mostrarErro('erro-entrar', 'E-mail ou senha incorretos.');
+
+  salvarSessao(email);
+  e.target.reset();
+  mostrarErro('erro-entrar', '');
+  atualizarCabecalho();
+  mostrarAviso(`Oi, ${usuario.nome}! 😊`);
+  irPara('#progresso');
+});
+
+document.querySelectorAll('.aba-form input').forEach(campo => {
+  campo.addEventListener('input', () => {
+    document.querySelectorAll('.aba-erro').forEach(p => p.textContent = '');
+  });
+});
+
+atualizarCabecalho();
